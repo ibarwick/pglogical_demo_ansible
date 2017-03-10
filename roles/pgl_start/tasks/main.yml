@@ -1,0 +1,4 @@
+---
+# roles/pgl_start/tasks/main.yml
+
+- include: pgl_db_start.yml

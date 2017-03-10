@@ -1,0 +1,9 @@
+---
+
+# pgl_destroy.yml
+
+- hosts: all
+  gather_facts: false
+  roles:
+    - pgl_destroy
+

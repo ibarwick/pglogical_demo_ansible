@@ -1,0 +1,93 @@
+---
+# roles/pgl_init/tasks/main.yml
+
+- name: Create data directories
+  file: dest={{base_data_dir}}/PGL{{item}} state=directory mode=0700
+  with_items:
+    - "{{pgl_ports}}"
+
+- name: Perform initdb
+  command: "{{pg_bin}}/initdb --data-checksums {{base_data_dir}}/PGL{{item}} -U {{db_superuser}}"
+  args:
+    creates: "{{base_data_dir}}/PGL{{item}}/postgresql.conf"
+  with_items:
+    - "{{pgl_ports}}"
+
+
+- name: Install pg_hba.conf
+  template: src=pg_hba.conf.j2 dest={{base_data_dir}}/PGL{{item}}/pg_hba.conf
+  with_items:
+    - "{{pgl_ports}}"
+
+- name: Install postgresql.local.conf
+  template: src=postgresql.local.conf.j2 dest={{base_data_dir}}/PGL{{item}}/postgresql.local.conf
+  with_items:
+    - "{{pgl_ports}}"
+
+- name: Ensure postgresql.local.conf is loaded
+  lineinfile: dest="{{base_data_dir}}/PGL{{item}}/postgresql.conf" line="include 'postgresql.local.conf'" state=present
+  with_items:
+    - "{{pgl_ports}}"
+
+- name: Install postgresql.pglogical.conf
+  template: src=postgresql.pglogical.conf.j2 dest={{base_data_dir}}/PGL{{item}}/postgresql.pglogical.conf
+  with_items:
+    - "{{pgl_ports}}"
+
+
+- name: Include postgresql.pglogical.conf from postgresql.conf
+  lineinfile: dest="{{base_data_dir}}/PGL{{item}}/postgresql.conf" line="include 'postgresql.pglogical.conf'" state=present
+  with_items:
+    - "{{pgl_ports}}"
+
+- include: pgl_db_start.yml
+
+
+- name: Create databases
+  postgresql_db: login_host="localhost" port="{{item}}" login_user="{{db_superuser}}" name="{{db_name}}" state="present"
+  with_items:
+    - "{{pgl_ports}}"
+
+  # Server version number is used to set version-specific parameters in the
+  # configuration files
+  # (NOTE: not currently used anywhere)
+- name: Extract server version number
+  shell: "{{pg_bin}}/psql -X -A -q -t -U {{db_superuser}} -d {{db_name}} -h localhost -p {{pgl_ports[0]}} -c 'SHOW SERVER_VERSION_NUM'"
+  register: server_version_num
+
+#- debug:
+#    msg: "{{server_version_num.stdout}}"
+
+- name: Create required extensions
+  shell: "{{pg_bin}}/psql -U {{db_superuser}} -d {{db_name}} -p {{item[0]}} -c 'CREATE EXTENSION IF NOT EXISTS {{item[1]}}'"
+  with_nested:
+    - "{{pgl_ports}}"
+    - [ 'pglogical' ]
+
+
+- name: Create required extensions (9.4 only)
+  shell: "{{pg_bin}}/psql -U {{db_superuser}} -d {{db_name}} -p {{item[0]}} -c 'CREATE EXTENSION IF NOT EXISTS {{item[1]}}'"
+  with_nested:
+    - "{{pgl_ports}}"
+    - [ 'pglogical_origin' ]
+  when: (server_version_num.stdout >= '90400') and (server_version_num.stdout < 90500)
+
+- name: Generate SQL to create provider node
+  template: src="provider_node_create.sql.j2" dest="/tmp/provider_node_create.sql"
+
+- name: Generate SQL to create subscriber node
+  template: src="subscriber_node_create.sql.j2" dest="/tmp/subscriber_node_create.{{item}}.sql"
+  with_items:
+    - "{{pgl_ports}}"
+  when: (item != pgl_provider)
+
+- name: Create provider node
+  shell: "{{pg_bin}}/psql -U {{db_superuser}} -d {{db_name}} -p {{pgl_provider}} -f /tmp/provider_node_create.sql"
+
+
+- name: Create subscriber nodes
+  shell: "{{pg_bin}}/psql -U {{db_superuser}} -d {{db_name}} -p {{item}} -f /tmp/subscriber_node_create.{{item}}.sql"
+  with_items:
+    - "{{pgl_ports}}"
+  when: (item != pgl_provider)
+

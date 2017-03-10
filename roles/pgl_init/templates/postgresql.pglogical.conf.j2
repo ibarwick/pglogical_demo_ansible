@@ -1,0 +1,19 @@
+# roles/pgl_init/templates/postgresql.pglogical.conf.j2
+#
+# See: https://github.com/2ndQuadrant/pglogical#quick-setup
+
+# General settings required for pglogical
+#----------------------------------------
+
+wal_level = 'logical'
+max_worker_processes = 10   # one per database needed on provider node
+                            # one per node needed on subscriber node
+max_replication_slots = 10  # one per node needed on provider node
+max_wal_senders = 10        # one per node needed on provider node
+shared_preload_libraries = 'pglogical'
+
+# Set up debugging output
+log_error_verbosity = verbose
+log_min_messages = debug1
+log_line_prefix = '[%t] d=%d p=%p a=%a%q '
+

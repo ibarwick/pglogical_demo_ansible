@@ -1,0 +1,15 @@
+---
+
+# common/tasks/pgl_db_stop.yml
+
+- name: Check pidfiles
+  stat: path="{{base_data_dir}}/PGL{{item}}/postmaster.pid"
+  register: pidfile_check
+  with_items:
+    - "{{pgl_ports}}"
+
+- name: Stop servers
+  shell: "{{pg_bin}}/pg_ctl -D {{base_data_dir}}/PGL{{item.item}} -m fast -w stop"
+  when: item.stat.exists
+  with_items:
+    - "{{pidfile_check.results}}"

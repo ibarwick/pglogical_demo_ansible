@@ -1,0 +1,11 @@
+SELECT pglogical.create_node(
+    node_name := 'subscriber_{{item}}',
+    dsn := 'host=localhost port={{item}} dbname={{db_name}} user={{db_superuser}}'
+);
+
+SELECT pglogical.create_subscription(
+    subscription_name := 'subscription{{item}}',
+    provider_dsn := 'host=localhost port={{pgl_provider}} dbname={{db_name}} user={{db_superuser}}'
+);
+
+{% include 'ddl.sql.j2' %}

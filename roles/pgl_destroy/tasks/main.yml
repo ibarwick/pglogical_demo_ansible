@@ -1,0 +1,15 @@
+---
+
+# roles/pgl_destroy/tasks/main.yml
+#
+# Nuke running pglogical installations from low orbit
+
+- include: pgl_db_stop.yml
+
+- name: Delete data directories
+  file:
+    path="{{base_data_dir}}/PGL{{item}}/"
+    state=absent
+  with_items:
+    - "{{pgl_ports}}"
+

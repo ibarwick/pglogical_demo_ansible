@@ -1,0 +1,9 @@
+---
+
+# pgl_start.yml
+
+- hosts: all
+  gather_facts: false
+  roles:
+    - pgl_start
+

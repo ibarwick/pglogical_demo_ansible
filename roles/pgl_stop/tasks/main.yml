@@ -1,0 +1,4 @@
+---
+# roles/pgl_stop/tasks/main.yml
+
+- include: pgl_db_stop.yml

@@ -1,0 +1,10 @@
+SELECT pglogical.create_node(
+    node_name := 'provider1',
+    dsn := 'host=localhost port={{pgl_provider}} dbname={{db_name}} user={{db_superuser}}'
+);
+
+{% include 'ddl.sql.j2' %}
+
+-- Add all tables in public schema to the default replication set
+SELECT pglogical.replication_set_add_all_tables('default', ARRAY['public']);
+

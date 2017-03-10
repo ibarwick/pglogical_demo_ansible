@@ -1,0 +1,18 @@
+---
+
+# common/defaults/main.yml
+
+db_superuser: postgres
+db_name: pgl_demo
+base_data_dir: "/tmp"
+base_log_dir: "/tmp"
+ansible_connection: local
+extra_connections: 5
+
+replication_sets: ""
+pgl_provider: 10001
+pgl_ports:
+  - 10001
+  - 10002
+  - 10003
+

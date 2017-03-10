@@ -1,0 +1,13 @@
+---
+
+# host_vars/sample_host.yml
+
+db_superuser: someuser
+base_data_dir: /path/to/base-data-dir
+pg_bin: /path/to/postgres-bdr/bin
+pgl_provider: 10001
+pgl_ports:
+  - 10001
+  - 10002
+  - 10003
+

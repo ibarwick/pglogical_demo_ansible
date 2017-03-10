@@ -1,0 +1,10 @@
+---
+
+# pgl_db_start.yml
+
+- name: Start servers
+  shell: "{{pg_bin}}/pg_ctl -D {{base_data_dir}}/PGL{{item}} -l {{base_log_dir}}/pgl.{{item}}.log -w start"
+  args:
+    creates: "{{base_data_dir}}/PGL{{item}}/postmaster.pid"
+  with_items:
+    - "{{pgl_ports}}"
