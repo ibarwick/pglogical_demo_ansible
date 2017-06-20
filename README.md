@@ -3,7 +3,7 @@ pglogical_demo_ansible
 
 This repository contains a set of Ansible playbooks to easily
 create a simple `pglogical` set-up with two or more nodes running
-on localhost.
+on different ports on localhost.
 
 For more details on 2ndQuadrant's `pglogical`, see:
 
@@ -16,7 +16,7 @@ Requirements
 - Ansible ( http://www.ansible.com/ )
 - psycopg2
 - PostgreSQL 9.5 or 9.6 with the pglogical extension(s) available
-  Note: `pglogical_demo_ansible` will not build the pglogical extentions(s);
+  Note: `pglogical_demo_ansible` will not build the pglogical extensions(s);
   see https://2ndquadrant.com/en/resources/pglogical/pglogical-docs/ for details
   on how to do this.
 
@@ -139,4 +139,3 @@ Following playbooks have been defined:
 - `pgl_stop.yml`
 
   Stops running pglogical nodes
-  
