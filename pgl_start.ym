@@ -1,8 +1,0 @@
----
-
-# pgl_stop.yml
-
-- hosts: all
-  gather_facts: false
-  roles:
-    - pgl_stop
